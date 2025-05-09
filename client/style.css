@@ -1,0 +1,212 @@
+/* Reset basic styles */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family:  'Poppins', sans-serif;
+  background-color: #f9f9f9;
+  color: #dde1e2;
+  padding: 20px;
+}
+.header {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #5b9bd5; 
+  padding: 40px ;
+  flex-direction: column;
+  margin-bottom: 7px;
+}
+.logo {
+  position: absolute;
+  left: 10px;
+  height: 150px;
+  border-radius: 40%;
+  max-width: 100%;
+  
+}
+.title-block {
+  text-align: center;
+  font-family: 'Poppins', sans-serif;
+}
+.title {
+  font-size: 2em;
+  font-weight: bold;
+  color: white;
+}
+
+.subtitle {
+  font-size: 1.1em;
+  color: white;
+  margin-top: 10px;
+}
+.title-container {
+  
+  
+  justify-content: center;
+  align-items: center;
+  align-content: center;
+  justify-content: center;
+  justify-items: center;
+}
+
+.title-container h1 {
+  justify-content: center;
+  align-items: center;
+  align-content: center;
+  justify-content: center;
+  justify-items: center;
+  margin: 0;
+  color: #2c3e50;
+}
+
+.title-container p {
+  justify-content: center;
+  align-items: center;
+  align-content: center;
+  justify-content: center;
+  justify-items: center;
+  margin: 2px 0 0;
+  color: #555;
+  
+}
+
+.search-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 15px;
+  background-color: #dce6f1;
+  border-radius: 5px;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.search-bar input,
+.search-bar select,
+.search-bar button {
+  padding: 10px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  height: 42px;
+}
+
+
+/* Job listings grid */
+.job-listings {
+  top: 50px;
+  left: 50px;
+  padding: 50px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+#view-bookmarks-btn {
+  display: block;
+  margin: 0 auto 20px;
+  padding: 10px 20px;
+  font-size: 16px;
+  left: 50px;
+}
+
+.job-listings{
+  bottom: 10px;
+  padding-top: 50px;
+  background-color:rgb(245, 239, 239); 
+}
+/* Job card */
+.job-item {
+  background-color: #01090a;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+  padding: 20px;
+  transition: transform 0.2s ease-in-out;
+  color: #007bff;
+}
+
+.job-item:hover {
+  transform: translateY(-5px);
+}
+
+.job-item h3 {
+  font-size: 1.4rem;
+  color: #2c3e50;
+  margin-bottom: 10px;
+}
+
+.job-item p {
+  margin: 6px 0;
+  font-size: 0.95rem;
+  color: #555;
+}
+
+.job-item a {
+  margin-top: 10px;
+  display: inline-block;
+  background-color: #007bff;
+  color: #fff;
+  padding: 10px 16px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: bold;
+  transition: background-color 0.3s;
+}
+
+.job-item a:hover {
+  background-color: #020b15;
+}
+@media (max-width: 600px) {
+  header {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .logo {
+    margin-bottom: 20px;
+    margin-right: 0;
+  }
+
+  .title-container {
+    align-items: center;
+  }
+
+
+
+  .search-container input,
+  .search-container select {
+    width: 90%;
+  }
+}
+.search-container {
+  margin-top: 10px; /* Add this for spacing from header */
+}
+
+.bookmark-btn {
+  margin-top: 12px;
+  background-color: #ffcc00;
+  color: #333;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.bookmark-btn:hover {
+  background-color: #e6b800;
+}
+.job-item h3 {
+  margin-bottom: 5px;
+}
+
+.bookmark-btn:hover {
+  opacity: 0.9;
+}
