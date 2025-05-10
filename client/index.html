@@ -36,17 +36,22 @@
       <option value="">All Sources</option>
       <option value="adzuna">Adzuna</option>
       <option value="remotive">Remotive</option>
-      <option value="arbeitnow">Arbeitnow</option>
+      <option value="Arbeitnow">Arbeitnow</option>
     </select>
     
     <button id="view-bookmarks-btn">View Bookmarked Jobs</button>
+    <button id="clear-bookmarks-btn">Clear All Bookmarks</button>
+
+
+    <button id="back-to-all-btn" style="display: none; background-color: #27ae60; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; margin-left: 10px;">⬅️ Back to All Jobs</button>
+
   </div>
   
   
 
   <!-- Job Listings Container -->
   <div id="jobsList" class="job-listings"></div>
-  <div id="loadingSpinner" style="display:none;">Loading...</div>
+  <div id="loadingSpinner" style="display:none;"><b>Loading...</b></div>
   <div id="paginationControls" style="text-align:center; margin-top: 20px;">
     <button id="prevPage" disabled>Prev</button>
     <span id="pageIndicator">Page 1</span>
