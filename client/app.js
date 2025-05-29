@@ -2,6 +2,7 @@ let allJobs = [];
 let currentPage = 1;
 let hasMoreJobs = true;
 const jobsPerPage = 20;
+let isViewingBookmarks = false;
 
 document.addEventListener('DOMContentLoaded', () => {
   fetchJobs();
@@ -13,17 +14,65 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('companyFilter').addEventListener('input', filterJobs);
   document.getElementById('sourceFilter').addEventListener('change', filterJobs);
 
-  // View Bookmarked Jobs
-  document.getElementById('view-bookmarks-btn').addEventListener('click', () => {
-    document.getElementById('searchInput').value = '';
-    document.getElementById('typeFilter').value = '';
-    document.getElementById('locationFilter').value = '';
-    document.getElementById('companyFilter').value = '';
-    document.getElementById('sourceFilter').value = '';
-    const bookmarks = JSON.parse(localStorage.getItem('bookmarkedJobs')) || [];
-    renderJobs(bookmarks, true);
-    document.getElementById('back-to-all-btn').style.display = 'inline-block';
+   // Profile sidebar
+  profileBtn.addEventListener('click', () => {
+  profileName.textContent = profileData.username;
+  profileEmail.textContent = profileData.email;
+  profileSidebar.style.width = '300px';
+  
+});
+console.log(profileData);
+
+  closeSidebarBtn.addEventListener('click', () => {
+  profileSidebar.style.width = '0';
+});
+
+document.getElementById('admin-jobs-btn').addEventListener('click', () => {
+  fetch('../auth/get_admin_jobs.php') 
+    .then(response => response.json())
+    .then(data => {
+      displayJobs(data);
+      document.getElementById('back-to-all-btn').style.display = 'inline-block';
+      document.getElementById('jobsList').style.display = 'none';
+      document.getElementById('admin-jobs-container').style.display = 'grid'; 
+      document.getElementById('back-to-all-btn').style.display = 'inline-block';
+    })
+    .catch(err => {
+      console.error("Error fetching admin jobs:", err);
+      alert("❌ Failed to load admin jobs.");
+    });
+});
+
+document.getElementById('back-to-all-btn').addEventListener('click', () => {
+  document.getElementById('admin-jobs-container').style.display = 'none';
+  const jobsList = document.getElementById('jobsList');
+  jobsList.style.display = 'grid'; 
+  jobsList.className = 'job-listings'; 
+  document.getElementById('back-to-all-btn').style.display = 'none';
+});
+
+function displayJobs(jobs) {
+  const container = document.getElementById("admin-jobs-container");
+  container.innerHTML = ""; // Clear previous jobs
+
+  jobs.forEach(job => {
+    const jobElement = document.createElement("div");
+    jobElement.className = "job";
+    jobElement.innerHTML = `
+      <h3>${job.title}</h3>
+      <p><strong>Description:</strong> ${job.description}</p>
+      <p><strong>Company:</strong> ${job.company}</p>
+      <p><strong>Location:</strong> ${job.location}</p>
+      <p><strong>Posted At:</strong> ${job.posted_at}</p>
+      <p><strong>Type:</strong> ${job.type}</p>
+      <p><strong>Apply Link:</strong> <a href="${job.apply_link}" target="_blank">Apply Here</a></p>
+    `;
+    container.appendChild(jobElement);
   });
+}
+
+  // View Bookmarked Jobs
+
 
   document.getElementById('clear-bookmarks-btn').addEventListener('click', () => {
     localStorage.removeItem("bookmarkedJobs");
@@ -36,25 +85,38 @@ document.addEventListener('DOMContentLoaded', () => {
     renderJobs(allJobs); // <-- this resets the bookmark buttons!
   }
   });
+document.getElementById('view-bookmarks-btn').addEventListener('click', () => {
+  isViewingBookmarks = true;
+  const bookmarks = JSON.parse(localStorage.getItem('bookmarkedJobs')) || [];
+  renderJobs(bookmarks, true);
+  document.getElementById('back-to-all-btn').style.display = 'inline-block';
+  filterJobs(); // Call filterJobs so that bookmarks are filtered too
+});
 
-  document.getElementById('back-to-all-btn').addEventListener('click', () => {
-    renderJobs(allJobs);
-    document.getElementById('back-to-all-btn').style.display = 'none';
-  });
+document.getElementById('back-to-all-btn').addEventListener('click', () => {
+  isViewingBookmarks = false;
+  renderJobs(allJobs);
+  document.getElementById('back-to-all-btn').style.display = 'none';
+});
 
-  document.getElementById("prevPage").addEventListener("click", () => {
-    if (currentPage > 1) {
-      currentPage--;
-      renderJobs(allJobs);
-    }
-  });
+ document.getElementById("prevPage").addEventListener("click", () => {
+  if (currentPage > 1) {
+    currentPage--;
+    renderJobs(filteredJobs);
+    window.scrollTo({ top: 0, behavior: 'auto' }); // scroll up smoothly
+  }
+});
 
-  document.getElementById("nextPage").addEventListener("click", () => {
-    if ((currentPage * jobsPerPage) < allJobs.length) {
-      currentPage++;
-      renderJobs(allJobs);
-    }
-  });
+document.getElementById("nextPage").addEventListener("click", () => {
+  const totalPages = Math.ceil(filteredJobs.length / jobsPerPage);
+  if (currentPage < totalPages) {
+    currentPage++;
+    renderJobs(filteredJobs);
+    window.scrollTo({ top: 0, behavior: 'auto' }); // scroll up smoothly
+  }
+});
+
+  
 });
 
 async function fetchJobs() {
@@ -68,6 +130,7 @@ async function fetchJobs() {
     const interleavedNewJobs = interleaveJobs(adzunaJobs, remotiveJobs, arbeitnowJobs);
     allJobs = [...allJobs, ...interleavedNewJobs];
     renderJobs(allJobs);
+    filteredJobs = allJobs;
   } catch (err) {
     console.error("Error fetching jobs:", err);
     document.getElementById("jobsList").innerHTML = "<p>Error loading job data.</p>";
@@ -95,6 +158,7 @@ function fetchAdzunaJobsPromise(page = currentPage) {
           description: job.description,
           apply_link: job.redirect_url,
           source: "Adzuna",
+          category: job.category || ''
         }));
       } else {
         return [];
@@ -117,6 +181,7 @@ function fetchRemotiveJobsPromise() {
         description: job.description,
         apply_link: job.url,
         source: "Remotive",
+        category: job.category || ''
       }));
     });
 }
@@ -128,14 +193,16 @@ function fetchArbeitnowJobsPromise() {
     .then(data => {
       if (!data.data) return [];
       return data.data.map(job => ({
-        title: job.title,
-        company: job.company,
-        location: job.location,
-        type: job.remote ? 'Remote' : 'Onsite',
-        description: job.description || '',
-        apply_link: job.url,
-        source: 'Arbeitnow',
-      }));
+      title: job.title || 'N/A',
+      company: job.company || 'N/A',
+      location: job.location || 'N/A',
+      type: job.remote ? 'Remote' : 'Onsite',
+      description: job.description || '',
+      apply_link: job.url,
+      source: 'Arbeitnow',
+      category: job.category || ''
+}));
+
     });
 }
 
@@ -160,101 +227,151 @@ let debounceTimer;
 function filterJobs() {
   clearTimeout(debounceTimer);
   debounceTimer = setTimeout(() => {
+    currentPage = 1;
     const title = document.getElementById('searchInput').value.toLowerCase();
     const type = document.getElementById('typeFilter').value.toLowerCase();
     const location = document.getElementById('locationFilter').value.toLowerCase();
     const company = document.getElementById('companyFilter').value.toLowerCase();
     const source = document.getElementById('sourceFilter').value.toLowerCase();
 
-    const filtered = allJobs.filter(job => {
+    const baseList = isViewingBookmarks
+      ? (JSON.parse(localStorage.getItem('bookmarkedJobs')) || [])
+      : allJobs;
+
+    const filtered = baseList.filter(job => {
       const matchTitle = job.title?.toLowerCase().includes(title);
       const matchType = !type || job.type?.toLowerCase().includes(type);
       const matchLocation = job.location?.toLowerCase().includes(location);
       const matchCompany = job.company?.toLowerCase().includes(company);
-      const matchSource = !source || job.source.toLowerCase().includes(source);
+      const matchSource = !source || job.source?.toLowerCase().includes(source);
+
       return matchTitle && matchType && matchLocation && matchCompany && matchSource;
     });
-
-    renderJobs(filtered);
+      filteredJobs = filtered;
+    renderJobs(filtered, isViewingBookmarks);
   }, 30);
 }
+
+
+function stripHTML(html) {
+  const div = document.createElement('div');
+  div.innerHTML = html;
+  return div.textContent?.trim() || '';
+}
+
+
 
 function renderJobs(jobs, isBookmarkView = false) {
   const container = document.getElementById('jobsList');
   container.innerHTML = '';
 
-  if (jobs.length === 0) {
-    container.innerHTML = '<p>No jobs found.</p>';
-    return;
-  }
-
   const bookmarks = JSON.parse(localStorage.getItem('bookmarkedJobs')) || [];
-  const start = (currentPage - 1) * jobsPerPage;
-  const end = start + jobsPerPage;
-  const jobsToDisplay = jobs.slice(start, end);
 
-  jobsToDisplay.forEach(job => {
-    const isBookmarked = bookmarks.some(j => j && j.title && j.company && j.title === job.title && j.company === job.company);
-    const el = document.createElement('div');
-    el.className = 'job-item';
-    el.style.border = '1px solid #ccc';
-    el.style.padding = '15px';
-    el.style.marginBottom = '15px';
-    el.style.borderRadius = '8px';
-    el.style.backgroundColor = '#f9f9f9';
+  if (isBookmarkView) {
+    currentPage = 1;
+    if (bookmarks.length === 0) {
+      container.innerHTML = "<p>No bookmarked jobs yet.</p>";
+    } else {
+      jobs.forEach(job => {
+        const el = document.createElement('div');
+        el.className = 'job-item';
+        el.style.border = '1px solid #ccc';
+        el.style.padding = '15px';
+        el.style.marginBottom = '15px';
+        el.style.borderRadius = '8px';
+        el.style.backgroundColor = '#f9f9f9';
 
-    el.innerHTML = `
-      <h3>${job.title}</h3>
-      <p><strong>Company:</strong> ${job.company}</p>
-      <p><strong>Location:</strong> ${job.location}</p>
-      <p><strong>Type:</strong> ${job.type}</p>
-      <p><strong>Description:</strong> ${stripHTML(job.description).slice(0, 150)}...</p>
-      <p><strong>Source:</strong> ${job.source}</p>
-      <a href="${job.apply_link}" target="_blank" style="display: inline-block; margin-top: 10px;">Apply Now</a><br><br>
-      ${
-        isBookmarkView
-          ? `<button class="remove-bookmark-btn" data-title="${job.title}" data-company="${job.company}" style="background-color:rgb(206, 120, 111); color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer;">❌ Remove Bookmark</button>`
-          : `<button class="bookmark-btn" data-title="${job.title}" data-company="${job.company}" style="background-color: ${isBookmarked ? '#888' : '#2980b9'}; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: ${isBookmarked ? 'not-allowed' : 'pointer'};" ${isBookmarked ? 'disabled' : ''}>
-              ${isBookmarked ? '✅ Bookmarked' : '🔖 Bookmark'}
-            </button>`
-      }
-    `;
-    container.appendChild(el);
-  });
+        el.innerHTML = `
+          <h3>${job.title}</h3>
+          <p><strong>Company:</strong> ${job.company}</p>
+          <p><strong>Location:</strong> ${job.location}</p>
+          <p><strong>Type:</strong> ${job.type}</p>
+          <p><strong>Description:</strong> ${stripHTML(job.description).slice(0, 150)}...</p>
+          <p><strong>Source:</strong> ${job.source}</p>
+          <a href="${job.apply_link}" target="_blank" style="display: inline-block; margin-top: 10px;">Apply Now</a><br><br>
+          <button class="remove-bookmark-btn" data-title="${job.title}" data-company="${job.company}" style="background-color:rgb(206, 120, 111); color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer;">❌ Remove Bookmark</button>
+        `;
+        container.appendChild(el);
+      });
+    }
 
-  // Pagination controls update
-  document.getElementById("pageIndicator").innerText = `Page ${currentPage}`;
-  document.getElementById("prevPage").disabled = currentPage === 1;
-  document.getElementById("nextPage").disabled = end >= jobs.length;
+    document.getElementById("prevPage").style.display = 'none';
+    document.getElementById("nextPage").style.display = 'none';
+    document.getElementById("pageIndicator").style.display = 'none';
+    document.getElementById('back-to-all-btn').style.display = 'inline-block';
 
-  // Bookmark handlers
-  document.querySelectorAll('.bookmark-btn:not([disabled])').forEach(button => {
-    button.addEventListener('click', () => {
-      const title = button.getAttribute('data-title');
-      const company = button.getAttribute('data-company');
-      const jobToBookmark = allJobs.find(job => job.title === title && job.company === company);
-      if (jobToBookmark) {
-        const bookmarks = JSON.parse(localStorage.getItem('bookmarkedJobs')) || [];
-        bookmarks.push(jobToBookmark);
-        localStorage.setItem('bookmarkedJobs', JSON.stringify(bookmarks));
-        alert('Job bookmarked!');
-        button.innerText = '✅ Bookmarked';
-        button.disabled = true;
-        button.style.backgroundColor = '#888';
-        button.style.cursor = 'not-allowed';
-      }
+    // Remove bookmark button handler
+    document.querySelectorAll('.remove-bookmark-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const title = e.target.dataset.title;
+        const company = e.target.dataset.company;
+        const updatedBookmarks = bookmarks.filter(j => !(j.title === title && j.company === company));
+        localStorage.setItem('bookmarkedJobs', JSON.stringify(updatedBookmarks));
+        renderJobs(updatedBookmarks, true);
+      });
     });
-  });
 
-  // Remove bookmark handlers
-  document.querySelectorAll('.remove-bookmark-btn').forEach(button => {
-    button.addEventListener('click', () => {
-      const title = button.getAttribute('data-title');
-      const company = button.getAttribute('data-company');
-      let bookmarks = JSON.parse(localStorage.getItem('bookmarkedJobs')) || [];
-      bookmarks = bookmarks.filter(job => !(job.title === title && job.company === company));
-      localStorage.setItem('bookmarkedJobs', JSON.stringify(bookmarks));
-      renderJobs(bookmarks, true);
+  } else {
+    // Pagination view
+    const start = (currentPage - 1) * jobsPerPage;
+    const end = start + jobsPerPage;
+    const jobsToDisplay = jobs.slice(start, end);
+
+    if (jobsToDisplay.length === 0) {
+      container.innerHTML = '<p>No jobs found.</p>';
+      return;
+    }
+
+    jobsToDisplay.forEach(job => {
+      const isBookmarked = bookmarks.some(j => j.title === job.title && j.company === job.company);
+      const el = document.createElement('div');
+      el.className = 'job-item';
+      el.style.border = '1px solid #ccc';
+      el.style.padding = '15px';
+      el.style.marginBottom = '15px';
+      el.style.borderRadius = '8px';
+      el.style.backgroundColor = '#f9f9f9';
+
+      el.innerHTML = `
+        <h3>${job.title}</h3>
+        <p><strong>Company:</strong> ${job.company}</p>
+        <p><strong>Location:</strong> ${job.location}</p>
+        <p><strong>Type:</strong> ${job.type}</p>
+        <p><strong>Description:</strong> ${stripHTML(job.description).slice(0, 150)}...</p>
+        <p><strong>Source:</strong> ${job.source}</p>
+        <a href="${job.apply_link}" target="_blank" style="display: inline-block; margin-top: 10px;">Apply Now</a><br><br>
+        <button class="bookmark-btn" data-title="${job.title}" data-company="${job.company}" style="background-color: ${isBookmarked ? '#888' : '#2980b9'}; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer;">
+          ${isBookmarked ? '✅ Bookmarked' : '🔖 Bookmark'}
+        </button>
+      `;
+      container.appendChild(el);
     });
-  });
+
+    // Pagination controls
+    document.getElementById("prevPage").style.display = 'inline-block';
+    document.getElementById("nextPage").style.display = 'inline-block';
+    document.getElementById("pageIndicator").style.display = 'inline-block';
+    document.getElementById("pageIndicator").textContent = `Page ${currentPage}`;
+    document.getElementById("prevPage").disabled = currentPage === 1;
+    document.getElementById("nextPage").disabled = end >= jobs.length;
+    // Bookmark button handler
+    document.querySelectorAll('.bookmark-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const title = e.target.dataset.title;
+        const company = e.target.dataset.company;
+        const jobToToggle = jobs.find(j => j.title === title && j.company === company);
+        const isAlreadyBookmarked = bookmarks.some(j => j.title === title && j.company === company);
+
+        let updatedBookmarks;
+        if (isAlreadyBookmarked) {
+          updatedBookmarks = bookmarks.filter(j => !(j.title === title && j.company === company));
+        } else {
+          updatedBookmarks = [...bookmarks, jobToToggle];
+        }
+
+        localStorage.setItem('bookmarkedJobs', JSON.stringify(updatedBookmarks));
+        renderJobs(jobs); // re-render to reflect bookmark state
+      });
+    });
+  }
 }
