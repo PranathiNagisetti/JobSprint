@@ -17,7 +17,6 @@ document.addEventListener('DOMContentLoaded', () => {
    // Profile sidebar
   profileBtn.addEventListener('click', () => {
   profileName.textContent = profileData.username;
-  profileEmail.textContent = profileData.email;
   profileSidebar.style.width = '300px';
   
 });
@@ -53,7 +52,7 @@ document.getElementById('back-to-all-btn').addEventListener('click', () => {
 
 function displayJobs(jobs) {
   const container = document.getElementById("admin-jobs-container");
-  container.innerHTML = ""; // Clear previous jobs
+  container.innerHTML = ""; 
 
   jobs.forEach(job => {
     const jobElement = document.createElement("div");

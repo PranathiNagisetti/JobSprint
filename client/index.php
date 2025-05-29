@@ -73,8 +73,9 @@ $email = isset($_SESSION['email']) ? $_SESSION['email'] : 'Not available';
 <!-- Sidebar -->
     <div id="profileSidebar" class="sidebar">
       <div class="sidebar-content">
-        <h3 id="profileName">Loading...</h3>
-        <p id="profileEmail"></p>
+        <center><img src="images.png" alt="Profile" style="width:40px; height:40px; border-radius:50%;">
+        <h1 id="profileName">Loading...</h1></center>
+        <br>
         <button id="changePasswordBtn">Change Password</button>
         <div id="changePasswordSection" style="display: none; margin-top: 10px;">
         <!-- Change Password Form -->
@@ -131,14 +132,14 @@ $email = isset($_SESSION['email']) ? $_SESSION['email'] : 'Not available';
   profileBtn.addEventListener('click', () => {
     sidebar.style.display = 'block';
     document.getElementById('profileName').innerText = profileData.username;
-    document.getElementById('profileEmail').innerText = profileData.email;
+    
   });
 
   // Hide profile sidebar
   closeSidebarBtn.addEventListener('click', () => {
     sidebar.style.display = 'none';
-    changePasswordSection.style.display = 'none'; // hide form if open
-    changePasswordBtn.style.display = 'inline-block'; // show the button again
+    changePasswordSection.style.display = 'none'; 
+    changePasswordBtn.style.display = 'inline-block'; 
   });
 
   // Toggle password form visibility

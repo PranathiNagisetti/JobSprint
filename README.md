@@ -11,7 +11,7 @@ JobSprint is a centralized job aggregator platform that fetches real-time listin
 
 ## 🚀 Tech Stack
 - **Frontend**: ReactJS, HTML5, CSS3, JavaScript
-- **Backend**: Xampp
+- **Backend**: Xampp ,PHP
 - **APIs**: Adzuna API, Remotive API ,Arbeitnow API , Juju API .... 
 - **Database**: MYSQL
 - **Deployment**: Vercel (Frontend), Render/Heroku (Backend)
