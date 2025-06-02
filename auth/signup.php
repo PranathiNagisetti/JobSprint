@@ -13,7 +13,7 @@ $username = $_POST['username'];
 $email = $_POST['email'];
 $password = $_POST['password'];
 $confirm_password = $_POST['confirm_password'];
-$type = $_POST['signup_type']; // 'user' or 'admin'
+$type = $_POST['signup_type']; 
 
 if ($password !== $confirm_password) {
     echo "<script>alert('Passwords do not match'); window.history.back();</script>";

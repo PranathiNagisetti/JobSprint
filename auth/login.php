@@ -12,7 +12,7 @@ if ($conn->connect_error) {
 
 $username = $_POST['username'];
 $password = $_POST['password'];
-$type = $_POST['login_type']; // 'user' or 'admin'
+$type = $_POST['login_type']; 
 
 $table = $type === 'admin' ? 'admins' : 'users';
 

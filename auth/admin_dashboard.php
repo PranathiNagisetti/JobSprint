@@ -11,8 +11,7 @@ if (!isset($_SESSION['username']) || $_SESSION['type'] !== 'admin') {
 $host = "localhost";
 $dbuser = "root";
 $dbpass = "";
-$dbname = "jobsprint"; // Replace with your DB name
-
+$dbname = "jobsprint"; 
 $conn = new mysqli($host, $dbuser, $dbpass, $dbname);
 if ($conn->connect_error) {
     die("Connection Failed: " . $conn->connect_error);

@@ -70,9 +70,9 @@ function displayJobs(jobs) {
   });
 }
 
-  // View Bookmarked Jobs
+  
 
-
+//Clear Bookmarks 
   document.getElementById('clear-bookmarks-btn').addEventListener('click', () => {
     localStorage.removeItem("bookmarkedJobs");
     alert('All bookmarks cleared.');
@@ -84,12 +84,13 @@ function displayJobs(jobs) {
     renderJobs(allJobs); // <-- this resets the bookmark buttons!
   }
   });
+// View Bookmarked Jobs
 document.getElementById('view-bookmarks-btn').addEventListener('click', () => {
   isViewingBookmarks = true;
   const bookmarks = JSON.parse(localStorage.getItem('bookmarkedJobs')) || [];
   renderJobs(bookmarks, true);
   document.getElementById('back-to-all-btn').style.display = 'inline-block';
-  filterJobs(); // Call filterJobs so that bookmarks are filtered too
+  filterJobs(); 
 });
 
 document.getElementById('back-to-all-btn').addEventListener('click', () => {
@@ -102,7 +103,7 @@ document.getElementById('back-to-all-btn').addEventListener('click', () => {
   if (currentPage > 1) {
     currentPage--;
     renderJobs(filteredJobs);
-    window.scrollTo({ top: 0, behavior: 'auto' }); // scroll up smoothly
+    window.scrollTo({ top: 0, behavior: 'auto' }); // scroll up 
   }
 });
 
@@ -111,7 +112,7 @@ document.getElementById("nextPage").addEventListener("click", () => {
   if (currentPage < totalPages) {
     currentPage++;
     renderJobs(filteredJobs);
-    window.scrollTo({ top: 0, behavior: 'auto' }); // scroll up smoothly
+    window.scrollTo({ top: 0, behavior: 'auto' }); // scroll up
   }
 });
 
@@ -249,13 +250,6 @@ function filterJobs() {
       filteredJobs = filtered;
     renderJobs(filtered, isViewingBookmarks);
   }, 30);
-}
-
-
-function stripHTML(html) {
-  const div = document.createElement('div');
-  div.innerHTML = html;
-  return div.textContent?.trim() || '';
 }
 
 
